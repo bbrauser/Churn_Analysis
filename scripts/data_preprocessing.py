@@ -1,44 +1,40 @@
 import pandas as pd
+from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.preprocessing import StandardScaler
 
-df = pd.read_csv('data/churn_data.csv')
+# Load the dataset
+df = pd.read_csv('data/churn_data_original.csv')
 
-print(df.isnull().sum())
+# Handle missing values
+df['TotalCharges'] = pd.to_numeric(df['TotalCharges'], errors='coerce')
 
-def preprocess_data(data_path):
-    
-    # Load the dataset
-    df = pd.read_csv(data_path)
+# Encode categorical variables
+label_encoder = LabelEncoder()
+categorical_columns = ['gender', 'Partner', 'Dependents', 'PhoneService', 'MultipleLines',
+                        'InternetService', 'OnlineSecurity', 'OnlineBackup', 'DeviceProtection',
+                        'TechSupport', 'StreamingTV', 'StreamingMovies', 'Contract', 'PaperlessBilling', 'PaymentMethod', 'Churn']
 
-    # Drop missing values if they total 15% or less of the total rows
-    df = df.dropna(thresh= int(len(df) * .15))
+for column in categorical_columns:
+    df[column] = label_encoder.fit_transform(df[column])
 
-    # Convert binary categorical columns to numerical
-    binary_cols = ['gender', 'Partner', 'Dependents', 'PhoneService', 'PaperlessBilling', 'Churn']
-    label_encoder = LabelEncoder()
-    for col in binary_cols:
-        df[col] = label_encoder.fit_transform(df[col])
+# Split the data into features and target
+X = df.drop(['customerID', 'Churn'], axis=1)
+y = df['Churn']
 
-    # Convert other categorical columns to dummy variables
-    categorical_cols = ['InternetService', 'OnlineSecurity', 'OnlineBackup', 'DeviceProtection',
-                        'TechSupport', 'StreamingTV', 'StreamingMovies', 'Contract', 'PaymentMethod']
-    df = pd.get_dummies(df, columns=categorical_cols, drop_first=True)
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    # Split the data into features (X) and target variable (y)
-    X = df.drop(['customerID', 'Churn'], axis=1)
-    y = df['Churn']
+# Standardize the numerical features
+scaler = StandardScaler()
+numerical_columns = ['tenure', 'MonthlyCharges', 'TotalCharges']
 
-    # Split the data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train[numerical_columns] = scaler.fit_transform(X_train[numerical_columns])
+X_test[numerical_columns] = scaler.transform(X_test[numerical_columns])
 
-    # Standardize numerical features
-    scaler = StandardScaler()
-    X_train = scaler.fit_transform(X_train)
-    X_test = scaler.transform(X_test)
-
-    return X_train, X_test, y_train, y_test
-
-if __name__ == "__main__":
-    data_path = "churn_data.csv"
-    X_train, X_test, y_train, y_test = preprocess_data(data_path)
+# Save the preprocessed data
+X_train.to_csv('data/X_train.csv', index=False)
+X_test.to_csv('data/X_test.csv', index=False)
+y_train.to_csv('data/y_train.csv', index=False)
+y_test.to_csv('data/y_test.csv', index=False)
+df.to_csv('data/churn_data_processed.csv', index=False)
