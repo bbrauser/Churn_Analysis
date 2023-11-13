@@ -4,9 +4,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 # Load the dataset
-df = pd.read_csv('data/churn_data_original.csv')
+df = pd.read_csv('data/churn_data.csv')
 
-# Handle missing values
+# Changing TotalCharges to numeric
 df['TotalCharges'] = pd.to_numeric(df['TotalCharges'], errors='coerce')
 
 # Encode categorical variables
@@ -37,4 +37,3 @@ X_train.to_csv('data/X_train.csv', index=False)
 X_test.to_csv('data/X_test.csv', index=False)
 y_train.to_csv('data/y_train.csv', index=False)
 y_test.to_csv('data/y_test.csv', index=False)
-df.to_csv('data/churn_data_processed.csv', index=False)

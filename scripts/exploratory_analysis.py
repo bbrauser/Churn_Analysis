@@ -3,8 +3,10 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 # Load the dataset
-file_path = 'data/churn_data_processed.csv'
-df = pd.read_csv(file_path)
+df = pd.read_csv('data/churn_data.csv')
+
+# Changing TotalCharges to numeric
+df['TotalCharges'] = pd.to_numeric(df['TotalCharges'], errors='coerce')
 
 # Display basic information about the dataset
 print("Dataset Information:")
