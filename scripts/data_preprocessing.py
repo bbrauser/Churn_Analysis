@@ -9,6 +9,8 @@ df = pd.read_csv('data/churn_data.csv')
 # Changing TotalCharges to numeric
 df['TotalCharges'] = pd.to_numeric(df['TotalCharges'], errors='coerce')
 
+df = df.dropna()
+
 # Encode categorical variables
 label_encoder = LabelEncoder()
 categorical_columns = ['gender', 'Partner', 'Dependents', 'PhoneService', 'MultipleLines',
